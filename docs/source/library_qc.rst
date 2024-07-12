@@ -5,12 +5,6 @@ Alignment and Proximity-Ligation QC
 
 At step :ref:`Removing PCR duplicates<DUPs>` you used the flag `--output-stats`, generating a stats file in addition to the pairsam output (e.g. --output-stats stats.txt). The stats file is an extensive output of pairs statistics as calculated by pairtools, including total reads, total mapped, total dups, total pairs for each pair of chromosomes etc'. Although you can use directly the pairtools stats file as is to get informed on the quality of the VariLink library, we find it easier to focus on a few key metrics. We include in this repository the script ``get_qc.py`` that summarize the paired-tools stats file and present them in percentage values in addition to absolute values.
 
-The images below explains how the values on the QC report are calculated:
-
-.. image:: /images/1.Aligning.png
-
-.. image:: /images/2.Cis_trans_valids.png
-
 **Command:**
 
 .. code-block:: console
@@ -29,24 +23,23 @@ After the script completes, it will print:
 
 .. code-block:: console
 
-   Total Read Pairs                              10,000,000     100%
-   Unmapped Read Pairs                           325,358       3.25%
-   Mapped Read Pairs                             8,129,270    81.29%
-   PCR Dup Read Pairs                            218,657       2.82%
-   No-Dup Read Pairs                             7,847,613    78.48%
-   No-Dup Cis Read Pairs                         5,616,943    71.58%
-   No-Dup Trans Read Pairs                       2,230,670    28.42%
-   No-Dup Valid Read Pairs (cis >= 1kb + trans)  5,929,881    75.56%
-   No-Dup Cis Read Pairs < 1kb                   1,917,732    24.44%
-   No-Dup Cis Read Pairs >= 1kb                  3,699,211    47.14%
-   No-Dup Cis Read Pairs >= 10kb                 3,221,239    41.05%
-
+   Total Read Pairs                              1,765,718  100%
+   Unmapped Read Pairs                           0          0.0%
+   Mapped Read Pairs                             1,765,644  100.0%
+   PCR Dup Read Pairs                            0          0.0%
+   No-Dup Read Pairs                             1,765,644  100.0%
+   No-Dup Cis Read Pairs                         1,418,245  80.32%
+   No-Dup Trans Read Pairs                       347,399    19.68%
+   No-Dup Valid Read Pairs (cis >= 1kb + trans)  1,322,938  74.93%
+   No-Dup Cis Read Pairs < 1kb                   442,706    25.07%
+   No-Dup Cis Read Pairs >= 1kb                  975,539    55.25%
+   No-Dup Cis Read Pairs >= 10kb                 796,075    45.09%
 
 
 Complexity
 ----------
 
-If you performed a shallow sequencing experiment (e.g. 10M reads) and running a QC analysis to decide which library to use for deep sequencing (DS), it is recommended to evaluate the complexity of the library before moving to DS. 
+If you performed a shallow sequencing experiment (e.g. < 10 Million reads) and running a QC analysis to decide which library to use for deep sequencing (DS), it is recommended to evaluate the complexity of the library before moving to DS. 
 
 The `lc_extrap` utility of the `preseq` package aims to predict the complexity of sequencing libraries. 
 
@@ -88,45 +81,38 @@ QC Assessment
 
 - Pass/No Pass Metrics
 
-  - No-Dup Cis Read Pairs >= 1kb – This value demonstrates that the proximity-ligation step was successful, and the majority of the data are useful in downstream analyses (e.g. loop calling).
-  - For Shallow QC Sequencing Complexity at 400M Read Pairs – This value informs how many unique reads a library can support.
-  - For Deep - sequencing No-Dup Read Pairs
+  - Mapping rate % - did it align well
+  - Duplicate rate % - is the library complex enough
+  - Cis >1kb - does the library contain long-range information
+  - Mean coverage - is there enough coverage
 
 - Pass/No Pass Values 
 
-  - The table below summarizes the minimum passing values for the metrics defined above. The cut-off values were determined for both shallow sequenced (10 million read pairs 2 x 150 bp) and deep sequenced data (200-300 Million read pairs 2 x 150 bp).
+  - The table below summarizes the minimum passing values for the metrics defined above.
 
-+--------------------------------+-----------------------------+----------------------------------------------+
-| Metric                         | Shallow Sequencing          | Deep Sequencing                              |
-+================================+=============================+==============================================+
-| No-Dup Cis Read Pairs >= 1kb   | >40% of no-dup read pairs   | >40% of no-dup read pairs                    |
-+--------------------------------+-----------------------------+----------------------------------------------+
-| Complexity @ 400M Read Pairs   | >125 million                | NA                                           |
-+--------------------------------+-----------------------------+----------------------------------------------+
-| No-Dup Read Pairs              | NA                          | >125 million                                 |
-+--------------------------------+-----------------------------+----------------------------------------------+
++--------------------------------+--------------------------------------+
+| Metric                         | Value                                |
++================================+======================================+
+| Mapping rate                   | > 50%                                |
++--------------------------------+--------------------------------------+
+| Duplicate rate                 | < 50%                                |
++--------------------------------+--------------------------------------+
+| % Cis contacts > 1kb           | > 20%                                |
++--------------------------------+--------------------------------------+
+| Mean Coverage                  | See sequencing recommendations below | 
++--------------------------------+--------------------------------------+
 
 Sequencing Recommendations
 --------------------------
 
-VariLink was designed to support looping calling with one sample. This requires generating four libraries from a single proximity-ligation reaction. This does not mean you need to sequence all four libraries. The amount of sequencing and the number of libraries you need to to sequence is dependent on the feature you are trying to detect and the resolution (or bin size) you wish to call features at. The table below outlines the number of libraries, total sequencing depth in read pairs, and how many read pairs are needed per library, and finally the minimal amount of no-dup read pairs summed across the libraries for each feature at given resolutions:
+- VariLink was designed to enable flexibility around sequence depth as different classes of variants require differing sequence depth to confidently call. For large structural variants such as translocations or gains and losses >1mb, only 5-10X genomic coverage is required. For SNV and INDELs, a more WGS application, we recommend similar sequencing depths as shotgun libraries which is 30-40X genomic coverage. Also keep in mind that tumor purity can play a role in how sequencing depth can impact detection capabilities
 
-+-------------------+--------------+-------------------+--------------------+--------------------------------+--------------------------------------------------------+
-| Feature           | Resolution   | Total # libraries | Total # read pairs | Total # read pairs per library | Minimal # of no-dup read pairs summed across libraries |
-+===================+==============+===================+====================+================================+========================================================+
-| A/B Compartments  | 50-100 kb    | 1                 | 200 Million        | 200 Million                    | >80 Million                                            |
-+-------------------+--------------+-------------------+--------------------+--------------------------------+--------------------------------------------------------+
-| TADS              | 25 kb        | 2                 | 400 Million        | 200 Million                    | >150 Million                                           |
-+-------------------+--------------+-------------------+--------------------+--------------------------------+--------------------------------------------------------+
-|                   | 10 kb        | 2                 | 600 Million        | 300 Million                    | >300 Million                                           |
-+-------------------+--------------+-------------------+--------------------+--------------------------------+--------------------------------------------------------+
-|                   | 5 kb         | 4                 | 800 Million        | 200 Million                    | >400 Million                                           |
-+-------------------+--------------+-------------------+--------------------+--------------------------------+--------------------------------------------------------+
-| Loops             | 10 kb        | 4                 | 800 Million        | 200 Million                    | >400 Million                                           |
-+-------------------+--------------+-------------------+--------------------+--------------------------------+--------------------------------------------------------+
-|                   | 5 kb         | 4                 | 1200 Million       | 300 Million                    | >500 Million                                           |
-+-------------------+--------------+-------------------+--------------------+--------------------------------+--------------------------------------------------------+
-| SV, CNV, SNV/Indel| N/A          | 1                 | 200 Million        | 200 Million                    | >80 Million                                            |
-+-------------------+--------------+-------------------+--------------------+--------------------------------+--------------------------------------------------------+
++---------------------------+---------------------------------------------+
+| Feature                   | Sequencing Depth    | Tumor Purity          |
++===========================+=====================+=======================+
+| SVs & CNVs Only           | 50-100M read pairs  | Samples > 20% purity  |
++---------------------------+---------------------+-----------------------+
+| SVs, CNVs, INDELs, & SNVs | 300-400M read pairs | Samples > 50% purity* |
++---------------------------+---------------------+-----------------------+
 
-To generate the most complete matrix you can from a single 500 thousand cell input, you need sequence 4 libraries to a total of 1200 million read pairs (300 million per library).
+* for samples with lower tumor purity - additional library and more sequencing is recommended

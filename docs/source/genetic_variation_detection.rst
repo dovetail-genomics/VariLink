@@ -32,6 +32,41 @@ Calling Structural Variants
 
   - Example :download:`breaks file <https://s3.amazonaws.com/dovetail.pub/VariLink/hic_breakfinder/K562.breaks.txt>` file
 
+Interpretation of Structural Variant Results
+############################################
+
+hic_breakfinder produces a number of results at various resolutions (10Kb, 100Kb, 1Mb), as well as a merged result file containing the deduplicated merged results from all three resolutions.
+The results file takes the form of a modified bedpe file, which contains two chromosomal positions. For example:
+
+.. csv-table::
+   :file: tables/hicb.csv
+   :header-rows: 1
+   :widths: 20 10 20 20 10 10 20 20 10
+   :class: tight-table
+
+The score column represents the most highly supported structural variants, and is a great place to begin investigating the most significant calls. In the next step, one may wish to
+visualise the structural variant at the matrix level. There are many tools available for visualizing HiC data at the matrix level. One possible solution is to use the .cool file and
+plot a region surrounding the two breakpoints using a plotting tool such as `hicPlotMatrix` from the HiCExplorer analysis suite (https://hicexplorer.readthedocs.io/en/latest/content/tools/hicPlotMatrix.html)
+For example, the following code can be used to plot a 1Mb window centered on each of the breakpoints:
+
+.. code-block:: console
+
+   	hicPlotMatrix -m K562.mcool::/resolutions/8000 -out SV.png --region chr9:130000000-132000000 --region2 chr22:22000000-24000000
+
+
+.. image:: /images/hicb.png
+   :alt: HiCB_example
+
+The image above depicts an translocation involving chromosome 9 and chromosome 22 (the Philadelphia translocation). The signal seen the upper right-hand quadrant
+represents trans chromosomal contacts between chromosome 9 and 22. The increase in signal at the center of the image indicates a strong increase in supporting ligation pairs
+at the SV breakpoint.
+
+Considerations for calling SVs
+##############################
+
+Be careful when considering other structural variant callers designed for shotgun-based sequencing methods, as these many of these tools are designed to take advantage of
+discordant read pair information (such as Delly and Manta). As the nature of a proximity ligation library is to artificially create chimeric ligation pairs, all valid ligation
+pairs will be considered a "discordant" read pair, and thus attempting to use tools that rely on this information will lead to an abundance of false positive calls.
 
 Calling Copy Number Variation
 +++++++++++++++++++++++++++++
@@ -50,17 +85,12 @@ Calling Copy Number Variation
    # segment into copy number calls
    cnvkit.py segment K562.cnr -o K562.cns
 
-   # generate CNV plots
-   cnvkit.py scatter K562.cnr -o K562_scatter.pdf
-   cnvkit.py diagram K562.cnr -o K562_diagram.pdf
 
 
 **Example Output(s)**
 
   - Example :download:`.cnr (logR ratio) <https://s3.amazonaws.com/dovetail.pub/VariLink/cnvkit/K562.cnr>` file
   - Example :download:`.cns (segmentation) <https://s3.amazonaws.com/dovetail.pub/VariLink/cnvkit/K562.cns>` file
-  - Example :download:`scatter pdf <https://s3.amazonaws.com/dovetail.pub/VariLink/cnvkit/K562_scatter.pdf>` file
-  - Example :download:`diagram pdf <https://s3.amazonaws.com/dovetail.pub/VariLink/cnvkit/K562_diagram.pdf>` file
 
 
 Calling SNVs and Indels
@@ -79,4 +109,13 @@ Calling SNVs and Indels
 
 **Example Output(s)**
 
-  - Example :download:`VCF file <https://s3.amazonaws.com/dovetail.pub/VariLink/deepVariant/K562.vcf>` file
+  - Example :download:`VCF file <https://s3.amazonaws.com/dovetail.pub/VariLink/deepvariant/K562.vcf.gz>` file
+
+Variant Annotation
+##################
+
+The VCF file produced by deepVariant is fully compatible with standard variant annotation pipelines, including:
+
+ - SnpEff https://pcingola.github.io/SnpEff
+ - Annovar https://annovar.openbioinformatics.org/en/latest/
+ - Variant Effect Predictor https://useast.ensembl.org/info/docs/tools/vep/index.html

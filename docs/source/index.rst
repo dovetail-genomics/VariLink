@@ -18,7 +18,7 @@ Overview
 ========
 - Cantata Bio™ VariLink® Genetic Variation is designed for the rapid generation of genomic interaction data specifically designed for detection of genetic variants
 
-.. image:: /images/VariLink_intro2.png
+.. image:: /images/workflow.png
    :alt: VariLink_Intro2
 
 - Key benefits of VariLink:
@@ -27,7 +27,7 @@ Overview
   - Reduced the sample input to 500 thousand cells from the 2-10 million cells required for Hi-C
   - Improved mapping rate and even genomic coverage result in more complete contact matrices enabling variant detection similar to shotgun libraries
 
-.. image:: /images/evenCoverage.png
+.. image:: /images/histograms.png
    :alt: evenCoverage
   
 - This guide will take you step by step on how to process and QC your VariLink library, how to interpret the QC results, how to generate contact maps, and how to perform genetic variant detection. If you don’t yet have a sequencing VariLink library and you want to get familiar with the data, you can download VariLink sequence libraries from our publicly available data sets. 
