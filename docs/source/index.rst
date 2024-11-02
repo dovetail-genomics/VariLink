@@ -6,7 +6,7 @@
    :width: 100pt
 
 
-Welcome to VariLink documentation
+Welcome to Dovetail Page for Genetic Variation documentation
 =================================
 
 
